@@ -1,0 +1,129 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>BST & Heap Visualizer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>BST & Heap Visualizer</h1>
+      <p>
+        Each activity has its own input. Heapify changes node values only,
+        preserving the source tree's shape.
+      </p>
+      <div class="panel guide">
+        <h2>Tree and heap rules</h2>
+        <div class="grid">
+          <div>
+            <h3>Binary search tree (BST)</h3>
+            <p>
+              A BST organizes values so searching can skip parts of the tree.
+              For every node, values smaller than it go in the left subtree and
+              values greater than it go in the right subtree. This rule applies
+              at every node. To build one, insert values in order: start at the
+              root, compare each value, move left if smaller or right if larger,
+              and place it in the first empty spot. To search, make the same
+              comparisons from the root until you find the value or reach an
+              empty child.
+            </p>
+            <p>
+              Example: insert 50, 30, 70. The 30 goes left of 50; 70 goes right.
+            </p>
+          </div>
+          <div>
+            <h3>Min heap</h3>
+            <p>
+              A min heap is a complete binary tree (all levels filled except
+              possibly the last, which fills left to right) where each parent is
+              less than or equal to its children. The smallest value is at the
+              root. A heap does not require left-to-right sorted values.
+            </p>
+            <h3>Max heap</h3>
+            <p>
+              A max heap is also complete, but each parent is greater than or
+              equal to its children. The largest value is at the root.
+            </p>
+          </div>
+          <div>
+            <h3>How to solve / heapify</h3>
+            <ol>
+              <li>Check the tree shape: a heap must be complete.</li>
+              <li>Start at the lowest parent and move upward.</li>
+              <li>
+                For a min heap, compare each parent with its children and swap
+                with the smaller child if needed. For a max heap, swap with the
+                larger child.
+              </li>
+              <li>
+                Continue swapping down that branch, then move to the next
+                parent. Finish at the root.
+              </li>
+              <li>
+                For root removal, replace the root with the last (deepest,
+                rightmost) value, remove that last node, then sift the new root
+                down using the same min/max rule.
+              </li>
+            </ol>
+            <p class="note">
+              This visualizer heapifies the values while keeping the input tree
+              links fixed. The usual array-based heap also relies on
+              complete-tree shape.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <label for="values"
+          >#1 Enter numbers to build the BST (comma-separated)</label
+        ><input id="values" value="50,30,70,20,40,60,80,10,25,35,45" /><button
+          id="generate1"
+        >
+          Generate #1
+        </button>
+        <button id="randomize1" type="button">Randomize numbers</button>
+        <div id="error1" class="error"></div>
+        <p class="note">
+          #1 builds a BST from this insertion sequence. Its heap views retain
+          the resulting BST links.
+        </p>
+      </div>
+      <div class="panel">
+        <label for="treeInput"
+          >#2 Enter an existing binary tree in level-order
+          (comma-separated)</label
+        ><input id="treeInput" value="40,20,60,10,30,50,70" /><button
+          id="generate2"
+        >
+          Heapify #2 tree
+        </button>
+        <button id="randomize2" type="button">Randomize #2 tree</button>
+        <div id="error2" class="error"></div>
+        <p class="note">
+          Use null or # for missing positions. Example: 40,20,60,null,30 makes
+          30 the right child of 20. #2 is completely independent from #1.
+        </p>
+      </div>
+      <div class="tabs">
+        <button class="active" data-tab="one">#1 Build trees</button
+        ><button data-tab="two">#2 Heapify existing tree</button
+        ><button data-tab="three">#3 Remove root twice</button
+        ><button data-tab="process">How they were built</button>
+      </div>
+      <section id="one" class="section active">
+        <div class="grid" id="buildTrees"></div>
+      </section>
+      <section id="process" class="section">
+        <div id="processContent"></div>
+      </section>
+      <section id="two" class="section">
+        <div class="grid" id="heapifyTrees"></div>
+      </section>
+      <section id="three" class="section">
+        <div class="grid" id="removeTrees"></div>
+      </section>
+    </main>
+    <script src="script.js" defer></script>
+  </body>
+</html>
