@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>BST & Heap Visualizer</title>
+    <style>
+:root {
+  color-scheme: dark;
+  scrollbar-color: #34424a #0d1318;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family:
+    system-ui,
+    Segoe UI,
+    Arial,
+    sans-serif;
+  background: #080d12;
+  color: #e6f1ef;
+  margin: 0;
+  padding: clamp(10px, 2.5vw, 24px);
+  min-height: 100vh;
+}
+main {
+  width: min(100%, 1440px);
+  margin: 0 auto;
+}
+h1 {
+  margin: 0 0 8px;
+}
+p {
+  color: #b2c5c2;
+}
+.panel {
+  background: #10171d;
+  border: 1px solid #25323a;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 14px 0;
+  box-shadow: 0 8px 24px #00000035;
+}
+label {
+  font-weight: 650;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #2e3d45;
+  border-radius: 8px;
+  margin: 8px 0 12px;
+  font-size: 16px;
+  background: #090e13;
+  color: #e6f1ef;
+}
+input:focus {
+  outline: 2px solid #c66a19;
+  outline-offset: 1px;
+}
+input::placeholder {
+  color: #9aadaa;
+}
+::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1318;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #34424a;
+  border: 2px solid #0d1318;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5a63;
+}
+button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #c66a19;
+  color: #f4e7da;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover {
+  background: #9e4f11;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+.tabs button {
+  background: #172127;
+  color: #d5e6e2;
+}
+.tabs button.active {
+  background: #c66a19;
+  color: #f4e7da;
+}
+.section {
+  display: none;
+}
+.section.active {
+  display: block;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 12px;
+}
+.treecard {
+  border: 1px solid #25323a;
+  border-radius: 12px;
+  padding: 12px;
+  overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.treecard h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+.tree {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  overflow: visible;
+}
+.edge {
+  stroke: #4c6663;
+  stroke-width: 2;
+}
+.node {
+  fill: #153330;
+  stroke: #258f81;
+  stroke-width: 2;
+}
+.nodeText {
+  font-weight: 700;
+  font-size: 15px;
+  fill: #effbf8;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.empty {
+  color: #9aadaa;
+  font-style: italic;
+}
+.note {
+  font-size: 13px;
+  color: #a4b8b4;
+}
+.error {
+  color: #b42318;
+  font-weight: 650;
+}
+.build-process {
+  grid-column: 1/-1;
+}
+#buildTrees {
+  grid-template-columns: minmax(0, 1fr);
+}
+#heapifyTrees {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.treecard .tree {
+  display: block;
+  margin: 0 auto;
+}
+.rules-box {
+  background: #172127;
+  border-left: 4px solid #c66a19;
+  border-radius: 8px;
+  padding: 12px 14px;
+  line-height: 1.6;
+  color: #e6f1ef;
+}
+.process-section {
+  margin-top: 22px;
+}
+.step-list {
+  display: grid;
+  gap: 12px;
+}
+.step-card {
+  background: #121a20;
+  border: 1px solid #2e3d45;
+  border-radius: 12px;
+  padding: 14px;
+}
+.step-card h4 {
+  margin: 0 0 6px;
+  color: #cc8741;
+}
+.step-card p {
+  margin: 4px 0 10px;
+}
+.step-visual {
+  max-width: 620px;
+}
+.step-visual .treecard {
+  background: #10171d;
+}
+.guide h2 {
+  margin: 0 0 8px;
+}
+.guide h3 {
+  margin: 12px 0 4px;
+  color: #cc8741;
+}
+.guide p,
+.guide li {
+  color: #b2c5c2;
+  line-height: 1.55;
+}
+.guide ul,
+.guide ol {
+  padding-left: 22px;
+  margin: 6px 0;
+}
+@media (max-width: 600px) {
+  body {
+    padding: 0;
+  }
+  main {
+    padding: 12px;
+  }
+  h1 {
+    font-size: 1.6rem;
+  }
+  .panel {
+    padding: 13px;
+    margin: 10px 0;
+  }
+  .tabs button {
+    flex: 1 1 auto;
+  }
+  .treecard {
+    padding: 9px;
+  }
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #heapifyTrees {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button {
+    transition:
+      background-color 0.15s ease,
+      transform 0.15s ease;
+  }
+  button:hover {
+    transform: translateY(-1px);
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>BST & Heap Visualizer</h1>
+      <p>
+        Each activity has its own input. Heapify changes node values only,
+        preserving the source tree's shape.
+      </p>
+      <div class="panel guide">
+        <h2>Tree and heap rules</h2>
+        <div class="grid">
+          <div>
+            <h3>Binary search tree (BST)</h3>
+            <p>
+              A BST organizes values so searching can skip parts of the tree.
+              For every node, values smaller than it go in the left subtree and
+              values greater than it go in the right subtree. This rule applies
+              at every node. To build one, insert values in order: start at the
+              root, compare each value, move left if smaller or right if larger,
+              and place it in the first empty spot. To search, make the same
+              comparisons from the root until you find the value or reach an
+              empty child.
+            </p>
+            <p>
+              Example: insert 50, 30, 70. The 30 goes left of 50; 70 goes right.
+            </p>
+          </div>
+          <div>
+            <h3>Min heap</h3>
+            <p>
+              A min heap is a complete binary tree (all levels filled except
+              possibly the last, which fills left to right) where each parent is
+              less than or equal to its children. The smallest value is at the
+              root. A heap does not require left-to-right sorted values.
+            </p>
+            <h3>Max heap</h3>
+            <p>
+              A max heap is also complete, but each parent is greater than or
+              equal to its children. The largest value is at the root.
+            </p>
+          </div>
+          <div>
+            <h3>How to solve / heapify</h3>
+            <ol>
+              <li>Check the tree shape: a heap must be complete.</li>
+              <li>Start at the lowest parent and move upward.</li>
+              <li>
+                For a min heap, compare each parent with its children and swap
+                with the smaller child if needed. For a max heap, swap with the
+                larger child.
+              </li>
+              <li>
+                Continue swapping down that branch, then move to the next
+                parent. Finish at the root.
+              </li>
+              <li>
+                For root removal, replace the root with the last (deepest,
+                rightmost) value, remove that last node, then sift the new root
+                down using the same min/max rule.
+              </li>
+            </ol>
+            <p class="note">
+              This visualizer heapifies the values while keeping the input tree
+              links fixed. The usual array-based heap also relies on
+              complete-tree shape.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <label for="values"
+          >#1 Enter numbers to build the BST (comma-separated)</label
+        ><input id="values" value="50,30,70,20,40,60,80,10,25,35,45" /><button
+          id="generate1"
+        >
+          Generate #1
+        </button>
+        <button id="randomize1" type="button">Randomize numbers</button>
+        <div id="error1" class="error"></div>
+        <p class="note">
+          #1 builds a BST from this insertion sequence. Its heap views retain
+          the resulting BST links.
+        </p>
+      </div>
+      <div class="panel">
+        <label for="treeInput"
+          >#2 Enter an existing binary tree in level-order
+          (comma-separated)</label
+        ><input id="treeInput" value="40,20,60,10,30,50,70" /><button
+          id="generate2"
+        >
+          Heapify #2 tree
+        </button>
+        <button id="randomize2" type="button">Randomize #2 tree</button>
+        <div id="error2" class="error"></div>
+        <p class="note">
+          Use null or # for missing positions. Example: 40,20,60,null,30 makes
+          30 the right child of 20. #2 is completely independent from #1.
+        </p>
+      </div>
+      <div class="tabs">
+        <button class="active" data-tab="one">#1 Build trees</button
+        ><button data-tab="two">#2 Heapify existing tree</button
+        ><button data-tab="three">#3 Remove root twice</button
+        ><button data-tab="process">How they were built</button>
+      </div>
+      <section id="one" class="section active">
+        <div class="grid" id="buildTrees"></div>
+      </section>
+      <section id="process" class="section">
+        <div id="processContent"></div>
+      </section>
+      <section id="two" class="section">
+        <div class="grid" id="heapifyTrees"></div>
+      </section>
+      <section id="three" class="section">
+        <div class="grid" id="removeTrees"></div>
+      </section>
+    </main>
+    <script>
+const $ = (id) => document.getElementById(id);
+function makeBST(values) {
+  let root = null;
+  for (const v of values) {
+    const n = { v, l: null, r: null };
+    if (!root) {
+      root = n;
+      continue;
+    }
+    let cur = root;
+    while (true) {
+      if (v < cur.v) {
+        if (!cur.l) {
+          cur.l = n;
+          break;
+        }
+        cur = cur.l;
+      } else {
+        if (!cur.r) {
+          cur.r = n;
+          break;
+        }
+        cur = cur.r;
+      }
+    }
+  }
+  return root;
+}
+function clone(t) {
+  if (!t) return null;
+  return { v: t.v, l: clone(t.l), r: clone(t.r) };
+}
+function nodes(root) {
+  let a = [];
+  function w(n) {
+    if (!n) return;
+    a.push(n);
+    w(n.l);
+    w(n.r);
+  }
+  w(root);
+  return a;
+}
+function heapify(root, kind) {
+  function sift(n) {
+    if (!n) return;
+    let best = n;
+    if (n.l && (kind === "min" ? n.l.v < best.v : n.l.v > best.v)) best = n.l;
+    if (n.r && (kind === "min" ? n.r.v < best.v : n.r.v > best.v)) best = n.r;
+    if (best !== n) {
+      [n.v, best.v] = [best.v, n.v];
+      sift(best);
+    }
+  }
+  function post(n) {
+    if (!n) return;
+    post(n.l);
+    post(n.r);
+    sift(n);
+  }
+  post(root);
+  return root;
+}
+function fromLevelOrder(tokens) {
+  let vals = tokens.map((t) => t.trim());
+  if (
+    !vals.length ||
+    !vals[0] ||
+    vals[0].toLowerCase() === "null" ||
+    vals[0] === "#"
+  )
+    return null;
+  let root = { v: Number(vals[0]), l: null, r: null },
+    arr = [root];
+  for (let i = 1; i < vals.length; i++) {
+    let token = vals[i],
+      node =
+        token === "" || token.toLowerCase() === "null" || token === "#"
+          ? null
+          : { v: Number(token), l: null, r: null };
+    let parentIndex = Math.floor((i - 1) / 2),
+      parent = arr[parentIndex];
+    if (parent) {
+      if (i % 2 === 1) parent.l = node;
+      else parent.r = node;
+    }
+    arr.push(node);
+  }
+  return root;
+}
+function drawTree(root, title) {
+  let card = document.createElement("div");
+  card.className = "treecard";
+  let h = document.createElement("h3");
+  h.textContent = title;
+  card.appendChild(h);
+  if (!root) {
+    let em = document.createElement("div");
+    em.className = "empty";
+    em.textContent = "Empty tree";
+    card.appendChild(em);
+    return card;
+  }
+  let levels = 0;
+  function inspect(n, d) {
+    if (!n) return;
+    levels = Math.max(levels, d);
+    inspect(n.l, d + 1);
+    inspect(n.r, d + 1);
+  }
+  inspect(root, 0);
+  const nodeGap = 68;
+  const branchGap = 54;
+  const height = (levels + 1) * 86;
+  const pos = new Map();
+  function layout(n, d = 0) {
+    if (!n) return null;
+
+    const left = layout(n.l, d + 1);
+    const right = layout(n.r, d + 1);
+    let leftShift = 0;
+    let rightShift = 0;
+
+    if (left && right) {
+      let separation = nodeGap;
+      const sharedLevels = Math.min(
+        left.rightContour.length,
+        right.leftContour.length,
+      );
+      for (let level = 0; level < sharedLevels; level++) {
+        separation = Math.max(
+          separation,
+          left.rightContour[level] + nodeGap - right.leftContour[level],
+        );
+      }
+      leftShift = -separation / 2;
+      rightShift = separation / 2;
+    } else if (left) {
+      leftShift = -branchGap;
+    } else if (right) {
+      rightShift = branchGap;
+    }
+
+    const x = 0;
+    pos.set(n, { x, y: 45 + d * 86 });
+
+    const leftContour = [x];
+    const rightContour = [x];
+    const subtreeLevels = Math.max(
+      left?.leftContour.length ?? 0,
+      right?.leftContour.length ?? 0,
+    );
+    for (let level = 0; level < subtreeLevels; level++) {
+      const candidates = [];
+      if (left && level < left.leftContour.length) {
+        candidates.push({
+          min: left.leftContour[level] + leftShift,
+          max: left.rightContour[level] + leftShift,
+        });
+      }
+      if (right && level < right.leftContour.length) {
+        candidates.push({
+          min: right.leftContour[level] + rightShift,
+          max: right.rightContour[level] + rightShift,
+        });
+      }
+      leftContour.push(Math.min(...candidates.map((item) => item.min)));
+      rightContour.push(Math.max(...candidates.map((item) => item.max)));
+    }
+
+    function applyShift(subtree, shift) {
+      if (!subtree) return;
+      for (const node of subtree.nodes) {
+        pos.get(node).x += shift;
+      }
+    }
+    applyShift(left, leftShift);
+    applyShift(right, rightShift);
+
+    return {
+      nodes: [n, ...(left?.nodes ?? []), ...(right?.nodes ?? [])],
+      leftContour,
+      rightContour,
+    };
+  }
+  layout(root);
+  let xs = Array.from(pos.values()).map((p) => p.x),
+    minX = Math.min(...xs),
+    maxX = Math.max(...xs),
+    width = Math.max(380, maxX - minX + 72),
+    shift = (width - (maxX - minX)) / 2 - minX;
+  for (let p of pos.values()) p.x += shift;
+  let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.style.width = width + "px";
+  svg.style.height = height + "px";
+  svg.style.maxWidth = "none";
+  svg.classList.add("tree");
+  function edges(n) {
+    if (!n) return;
+    let p = pos.get(n);
+    for (let c of [n.l, n.r])
+      if (c) {
+        let cp = pos.get(c),
+          line = document.createElementNS(svg.namespaceURI, "line");
+        line.setAttribute("x1", p.x);
+        line.setAttribute("y1", p.y + 22);
+        line.setAttribute("x2", cp.x);
+        line.setAttribute("y2", cp.y - 22);
+        line.classList.add("edge");
+        svg.appendChild(line);
+      }
+    edges(n.l);
+    edges(n.r);
+  }
+  edges(root);
+  function circles(n) {
+    if (!n) return;
+    let p = pos.get(n),
+      g = document.createElementNS("http://www.w3.org/2000/svg", "g"),
+      c = document.createElementNS("http://www.w3.org/2000/svg", "circle"),
+      t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    c.setAttribute("cx", p.x);
+    c.setAttribute("cy", p.y);
+    c.setAttribute("r", 22);
+    c.classList.add("node");
+    t.setAttribute("x", p.x);
+    t.setAttribute("y", p.y);
+    t.classList.add("nodeText");
+    t.textContent = n.v;
+    g.append(c, t);
+    svg.appendChild(g);
+    circles(n.l);
+    circles(n.r);
+  }
+  circles(root);
+  card.appendChild(svg);
+  return card;
+}
+function removeRootTwice(root, kind) {
+  let stages = [],
+    cur = clone(root);
+  for (let step = 0; step < 2 && cur; step++) {
+    let level = [];
+    function bfs(n) {
+      if (!n) return;
+      level.push(n);
+      if (n.l) bfsQueue.push(n.l);
+      if (n.r) bfsQueue.push(n.r);
+    }
+    let bfsQueue = [cur];
+    while (bfsQueue.length) {
+      let n = bfsQueue.shift();
+      level.push(n);
+      if (n.l) bfsQueue.push(n.l);
+      if (n.r) bfsQueue.push(n.r);
+    } // correction below: breadth-first final element is deepest/rightmost
+    if (level.length === 1) {
+      cur = null;
+      stages.push(null);
+      continue;
+    }
+    let last = level[level.length - 1],
+      parent = null,
+      side = null;
+    function find(n) {
+      if (!n) return;
+      if (n.l === last) {
+        parent = n;
+        side = "l";
+        return;
+      }
+      if (n.r === last) {
+        parent = n;
+        side = "r";
+        return;
+      }
+      find(n.l);
+      if (!parent) find(n.r);
+    }
+    find(cur);
+    cur.v = last.v;
+    if (parent) parent[side] = null;
+    heapify(cur, kind);
+    stages.push(clone(cur));
+  }
+  return stages;
+}
+function validateNumbers(s) {
+  let vals = s
+    .split(",")
+    .map((x) => x.trim())
+    .filter((x) => x !== "")
+    .map(Number);
+  return vals.length &&
+    vals.every(Number.isFinite) &&
+    new Set(vals).size === vals.length
+    ? vals
+    : null;
+}
+function buildProcess(values, bst) {
+  let panel = document.createElement("div");
+  panel.className = "panel guide build-process";
+  let title = document.createElement("h2");
+  title.textContent = "How these trees were built";
+  panel.appendChild(title);
+  let intro = document.createElement("p");
+  intro.textContent =
+    "Follow each step in order. Every diagram shows the tree after that step.";
+  panel.appendChild(intro);
+  let rules = document.createElement("div");
+  rules.className = "rules-box";
+  rules.innerHTML =
+    "<strong>Rules:</strong> BST — smaller values go left, larger values go right. Min heap — each parent is less than or equal to its children. Max heap — each parent is greater than or equal to its children. Heap adjustments sift a value down by swapping with the smallest child (min) or largest child (max).";
+  panel.appendChild(rules);
+  function section(name, rule) {
+    let s = document.createElement("section");
+    s.className = "process-section";
+    let h = document.createElement("h3");
+    h.textContent = name;
+    s.appendChild(h);
+    let r = document.createElement("p");
+    r.className = "note";
+    r.textContent = rule;
+    s.appendChild(r);
+    let list = document.createElement("div");
+    list.className = "step-list";
+    s.appendChild(list);
+    panel.appendChild(s);
+    return list;
+  }
+  function step(list, n, text, tree, title) {
+    let card = document.createElement("div");
+    card.className = "step-card";
+    let head = document.createElement("h4");
+    head.textContent = "Step " + n;
+    card.appendChild(head);
+    let desc = document.createElement("p");
+    desc.textContent = text;
+    card.appendChild(desc);
+    let visual = document.createElement("div");
+    visual.className = "step-visual";
+    visual.appendChild(drawTree(tree, title));
+    card.appendChild(visual);
+    list.appendChild(card);
+  }
+  let bstList = section(
+    "1. Build the BST",
+    "At each node, compare the next number: go left when it is smaller, right when it is larger, then place it in an empty child.",
+  );
+  for (let i = 0; i < values.length; i++) {
+    let v = values[i],
+      prior = makeBST(values.slice(0, i)),
+      cur = prior,
+      checks = [];
+    if (i === 0) checks.push(v + " becomes the root.");
+    else {
+      while (cur) {
+        if (v < cur.v) {
+          checks.push(v + " < " + cur.v + ": go left.");
+          if (!cur.l) {
+            checks.push("The left spot is empty; insert " + v + ".");
+            break;
+          }
+          cur = cur.l;
+        } else {
+          checks.push(v + " > " + cur.v + ": go right.");
+          if (!cur.r) {
+            checks.push("The right spot is empty; insert " + v + ".");
+            break;
+          }
+          cur = cur.r;
+        }
+      }
+    }
+    step(
+      bstList,
+      i + 1,
+      checks.join(" "),
+      makeBST(values.slice(0, i + 1)),
+      "BST after inserting " + v,
+    );
+  }
+  function heapSteps(kind, label, rule) {
+    let list = section(label, rule),
+      copy = clone(bst),
+      count = 0;
+    function sift(n) {
+      let log = [],
+        best = n;
+      if (n.l && (kind === "min" ? n.l.v < best.v : n.l.v > best.v)) best = n.l;
+      if (n.r && (kind === "min" ? n.r.v < best.v : n.r.v > best.v)) best = n.r;
+      if (best !== n) {
+        let a = n.v,
+          b = best.v;
+        [n.v, best.v] = [best.v, n.v];
+        log.push(
+          "Parent " +
+            a +
+            " violates the rule; swap with " +
+            (kind === "min" ? "smaller" : "larger") +
+            " child " +
+            b +
+            ".",
+        );
+        let more = sift(best);
+        log.push(...more);
+      } else {
+        log.push(
+          "Node " + n.v + " satisfies the rule with its existing children.",
+        );
+      }
+      return log;
+    }
+    function post(n) {
+      if (!n) return;
+      post(n.l);
+      post(n.r);
+      count++;
+      let messages = sift(n);
+      step(
+        list,
+        count,
+        messages.join(" "),
+        clone(copy),
+        label + " after checking node " + n.v,
+      );
+    }
+    post(copy);
+  }
+  heapSteps(
+    "min",
+    "2. Build the min heap",
+    "Rule: each parent must be less than or equal to its children. Start at the lowest parents and work upward; if a parent is too large, swap it with the smaller child and keep sifting down.",
+  );
+  heapSteps(
+    "max",
+    "3. Build the max heap",
+    "Rule: each parent must be greater than or equal to its children. Start at the lowest parents and work upward; if a parent is too small, swap it with the larger child and keep sifting down.",
+  );
+  return panel;
+}
+function run1() {
+  let vals = validateNumbers($("values").value);
+  $("error1").textContent = "";
+  if (!vals) {
+    $("error1").textContent =
+      "Enter valid distinct numbers separated by commas.";
+    return;
+  }
+  let bst = makeBST(vals),
+    min = heapify(clone(bst), "min"),
+    max = heapify(clone(bst), "max"),
+    out = $("buildTrees");
+  out.innerHTML = "";
+  out.append(
+    drawTree(clone(bst), "BST"),
+    drawTree(min, "Min Heap (BST structure kept)"),
+    drawTree(max, "Max Heap (BST structure kept)"),
+  );
+  $("processContent").innerHTML = "";
+  $("processContent").append(buildProcess(vals, bst));
+}
+function run2() {
+  let tokens = $("treeInput").value.split(","),
+    out = $("heapifyTrees"),
+    err = $("error2");
+  err.textContent = "";
+  let present = tokens.filter(
+    (t) =>
+      t.trim() !== "" && t.trim().toLowerCase() !== "null" && t.trim() !== "#",
+  );
+  if (present.some((t) => !Number.isFinite(Number(t.trim())))) {
+    err.textContent = "Use numbers, null, or # placeholders only.";
+    return;
+  }
+  let vals = present.map((t) => Number(t.trim()));
+  if (new Set(vals).size !== vals.length) {
+    err.textContent = "Please use distinct values in the #2 tree.";
+    return;
+  }
+  let source = fromLevelOrder(tokens);
+  if (!source) {
+    err.textContent = "Tree input must start with a number.";
+    return;
+  }
+  let min = heapify(clone(source), "min"),
+    max = heapify(clone(source), "max");
+  out.innerHTML = "";
+  out.append(
+    drawTree(min, "Min Heap (#2 source shape kept)"),
+    drawTree(max, "Max Heap (#2 source shape kept)"),
+  );
+  let mins = removeRootTwice(min, "min"),
+    maxs = removeRootTwice(max, "max"),
+    rem = $("removeTrees");
+  rem.innerHTML = "";
+  rem.append(
+    drawTree(mins[0], "Min Heap — after 1st root removal"),
+    drawTree(mins[1], "Min Heap — after 2nd root removal"),
+    drawTree(maxs[0], "Max Heap — after 1st root removal"),
+    drawTree(maxs[1], "Max Heap — after 2nd root removal"),
+  );
+}
+$("generate1").addEventListener("click", run1);
+$("randomize1").addEventListener("click", () => {
+  let pool = Array.from({ length: 90 }, (_, i) => i + 10);
+  for (let i = pool.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  let entered = $("values")
+    .value.split(",")
+    .filter((x) => x.trim() !== "").length;
+  let count = Math.max(11, Math.min(90, entered));
+  $("values").value = pool.slice(0, count).join(",");
+  run1();
+  document.querySelector('[data-tab="process"]').click();
+});
+$("generate2").addEventListener("click", run2);
+$("randomize2").addEventListener("click", () => {
+  let pool = Array.from({ length: 90 }, (_, i) => i + 10);
+  for (let i = pool.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  $("treeInput").value = pool.slice(0, 7).join(",");
+  run2();
+  document.querySelector('[data-tab="two"]').click();
+});
+document.querySelectorAll(".tabs button").forEach((b) =>
+  b.addEventListener("click", () => {
+    document
+      .querySelectorAll(".tabs button")
+      .forEach((x) => x.classList.remove("active"));
+    document
+      .querySelectorAll(".section")
+      .forEach((x) => x.classList.remove("active"));
+    b.classList.add("active");
+    $(b.dataset.tab).classList.add("active");
+  }),
+);
+run1();
+run2();
+
+    </script>
+  </body>
+</html>
