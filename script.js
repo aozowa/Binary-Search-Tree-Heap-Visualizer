@@ -109,28 +109,81 @@ function drawTree(root, title) {
     inspect(n.r, d + 1);
   }
   inspect(root, 0);
-  let spacing = 96,
-    branchGap = 54,
-    height = (levels + 1) * 86,
-    cursor = 0,
-    pos = new Map();
-  function layout(n, d) {
+  const nodeGap = 68;
+  const branchGap = 54;
+  const height = (levels + 1) * 86;
+  const pos = new Map();
+  function layout(n, d = 0) {
     if (!n) return null;
-    let x;
-    if (n.l && n.r) {
-      let lx = layout(n.l, d + 1),
-        rx = layout(n.r, d + 1);
-      x = (lx + rx) / 2;
-    } else if (n.l) x = layout(n.l, d + 1) + branchGap;
-    else if (n.r) x = layout(n.r, d + 1) - branchGap;
-    else {
-      x = cursor;
-      cursor += spacing;
+
+    const left = layout(n.l, d + 1);
+    const right = layout(n.r, d + 1);
+    let leftShift = 0;
+    let rightShift = 0;
+
+    if (left && right) {
+      let separation = nodeGap;
+      const sharedLevels = Math.min(
+        left.rightContour.length,
+        right.leftContour.length,
+      );
+      for (let level = 0; level < sharedLevels; level++) {
+        separation = Math.max(
+          separation,
+          left.rightContour[level] + nodeGap - right.leftContour[level],
+        );
+      }
+      leftShift = -separation / 2;
+      rightShift = separation / 2;
+    } else if (left) {
+      leftShift = -branchGap;
+    } else if (right) {
+      rightShift = branchGap;
     }
+
+    const x = 0;
     pos.set(n, { x, y: 45 + d * 86 });
-    return x;
+
+    const leftContour = [x];
+    const rightContour = [x];
+    const subtreeLevels = Math.max(
+      left?.leftContour.length ?? 0,
+      right?.leftContour.length ?? 0,
+    );
+    for (let level = 0; level < subtreeLevels; level++) {
+      const candidates = [];
+      if (left && level < left.leftContour.length) {
+        candidates.push({
+          min: left.leftContour[level] + leftShift,
+          max: left.rightContour[level] + leftShift,
+        });
+      }
+      if (right && level < right.leftContour.length) {
+        candidates.push({
+          min: right.leftContour[level] + rightShift,
+          max: right.rightContour[level] + rightShift,
+        });
+      }
+      leftContour.push(Math.min(...candidates.map((item) => item.min)));
+      rightContour.push(Math.max(...candidates.map((item) => item.max)));
+    }
+
+    function applyShift(subtree, shift) {
+      if (!subtree) return;
+      for (const node of subtree.nodes) {
+        pos.get(node).x += shift;
+      }
+    }
+    applyShift(left, leftShift);
+    applyShift(right, rightShift);
+
+    return {
+      nodes: [n, ...(left?.nodes ?? []), ...(right?.nodes ?? [])],
+      leftContour,
+      rightContour,
+    };
   }
-  layout(root, 0);
+  layout(root);
   let xs = Array.from(pos.values()).map((p) => p.x),
     minX = Math.min(...xs),
     maxX = Math.max(...xs),
